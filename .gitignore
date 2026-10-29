@@ -6,3 +6,12 @@ node_modules/
 coverage/
 .DS_Store
 Thumbs.db
+
+# Local tickets, drafts, and session recovery files
+.data/
+
+# Local ticket screenshots
+Screenshots/
+
+# Local scratch notes
+New Text Document.txt

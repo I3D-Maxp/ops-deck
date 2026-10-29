@@ -1,6 +1,154 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ops Deck</title><link rel="stylesheet" href="style.css"></head><body>
-<div class="layout"><aside><h1><b>OPS</b> DECK</h1><small>DATACENTRE WORKSPACE</small><nav><a class="active">▣ Ticket workspace</a><a href="https://i3dnet.atlassian.net/jira/dashboards/12754?maximized=59715" target="_blank">↗ Jira dashboard A</a><a href="https://i3dnet.atlassian.net/jira/dashboards/12754?maximized=59711" target="_blank">↗ Jira dashboard B</a></nav><h3>CONTROL PANEL</h3><div id="tools"></div><button class="dashed" id="addTool">＋ Add tool</button></aside>
-<main><header><div><h2>Ticket workspace</h2><p>Import from Jira or paste ticket text.</p></div><span id="state">Ready</span></header>
-<section class="import card"><label>Jira ticket URL or key</label><div class="line"><input id="jiraInput" placeholder="ITSM-75363 or paste its Jira URL"><button class="primary" id="importBtn">Import from Jira</button></div><details><summary>Fallback: paste copied Jira ticket text</summary><textarea id="raw" placeholder="Paste copied ticket content here"></textarea><button id="parseBtn">Parse pasted text</button></details><p class="hint">Credentials stay on the local backend. They are never placed in browser code.</p></section>
-<div class="columns"><section id="ticket" class="card empty">No ticket loaded.</section><div><section class="card"><h3>WORK PLAN</h3><div id="checks"></div><div class="divider"></div><label>Working notes</label><textarea id="notes" placeholder="Commands, findings, hand-off notes..."></textarea><div class="line"><button id="copyNotes">Copy notes</button><button class="green" id="done">Mark done +10 XP</button></div></section><section class="card stats"><div><small>XP</small><b id="xp">0</b></div><div><small>COMPLETED</small><b id="completed">0</b></div></section></div></div></main></div>
-<dialog id="toolDialog"><form method="dialog"><h2>Add tool</h2><input id="toolName" placeholder="Tool name"><input id="toolUrl" placeholder="https://..."><select id="toolIcon"><option>🔧</option><option>📚</option><option>🖥️</option><option>🔍</option><option>📊</option></select><div class="line"><button value="cancel">Cancel</button><button class="primary" value="default" id="saveTool">Add</button></div></form></dialog><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aether Desk</title><link rel="preload" href="fonts/Manrope-Variable.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="style.css?v=character-player-1"></head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">
+    <svg class="brand-wave" viewBox="0 0 440 140" fill="none" aria-hidden="true" focusable="false" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="aether-spectrum" x1="0" y1="0" x2="440" y2="100" gradientUnits="userSpaceOnUse"><stop stop-color="#4c8dff" stop-opacity="0"/><stop offset=".25" stop-color="#657dff"/><stop offset=".55" stop-color="#64e5e0"/><stop offset=".8" stop-color="#b2a0ff"/><stop offset="1" stop-color="#4c8dff" stop-opacity="0"/></linearGradient>
+        <filter id="aether-soften" x="-20%" y="-100%" width="140%" height="300%"><feGaussianBlur stdDeviation="5"/></filter>
+      </defs>
+      <g class="aether-current aether-current-back" stroke="url(#aether-spectrum)">
+        <path d="M-50 83 C10 18 55 125 115 67 S220 25 280 76 S375 120 490 36" stroke-width="14" opacity=".45" filter="url(#aether-soften)"/>
+        <path d="M-50 83 C10 18 55 125 115 67 S220 25 280 76 S375 120 490 36" stroke-width="1.2" opacity=".8"/>
+      </g>
+      <g class="aether-current aether-current-front" stroke="url(#aether-spectrum)">
+        <path d="M-50 58 C25 118 65 12 145 64 S250 120 320 60 S415 22 490 77" stroke-width="10" opacity=".3" filter="url(#aether-soften)"/>
+        <path d="M-50 58 C25 118 65 12 145 64 S250 120 320 60 S415 22 490 77" stroke-width="1.5" opacity=".9"/>
+        <path d="M-50 66 C25 126 65 20 145 72 S250 128 320 68 S415 30 490 85" stroke-width=".65" opacity=".4"/>
+      </g>
+    </svg>
+    <h1><b>AETHER</b> DESK</h1>
+    <small class="brand-motto">'Operatus est deos'</small>
+    <div id="brandDuckHabitat" class="brand-duck-habitat" aria-hidden="true"><span id="brandDuckSprite" class="brand-duck-sprite"></span></div>
+  </div>
+  <nav aria-label="Workspace">
+    <a class="active" href="#jiraInput">Open ticket</a><button id="showQueue" type="button" class="queue-nav" aria-controls="queuePanel" aria-expanded="false">Live queue</button><button id="showMyQueue" type="button" class="queue-nav" aria-controls="queuePanel" aria-expanded="false">My tickets</button>
+    <button id="showHardwareQueue" type="button" class="queue-nav" aria-controls="queuePanel" aria-expanded="false">Hardware alerts</button>
+  </nav>
+  <h3>TOOLS</h3><p class="tools-hint">Highlighted tools are suggested for the active ticket.</p>
+  <nav class="tool-shortcuts" aria-label="Tools">
+    <a class="tool" href="https://admin.i3d.net/" target="_blank" rel="noopener noreferrer">i3D Admin</a>
+    <a class="tool" href="https://admin.i3d.net/network-servers-mass-action-1.php" target="_blank" rel="noopener noreferrer">MASS server</a>
+    <a class="tool" href="https://netbox.i3d.network/" target="_blank" rel="noopener noreferrer">NetBox</a>
+    <a class="tool" href="https://i3dnet.atlassian.net/wiki/spaces/OPS/overview" target="_blank" rel="noopener noreferrer">OPS Wiki</a>
+    <a class="tool" href="https://i3dnet.atlassian.net/wiki/spaces/OPS/pages/107544773/i3D.net+sites+information" target="_blank" rel="noopener noreferrer">Sites Information</a>
+    <a class="tool" href="https://qa.i3d.network/" target="_blank" rel="noopener noreferrer">QA</a>
+  </nav>
+  <div id="tools"></div><button class="dashed" id="addTool">+ Add tool</button>
+  <button id="characterCycle" type="button" class="sidebar-squall" aria-label="Next character animation" title="Click for next character animation"><span id="characterSprite" class="squall-sprite" aria-hidden="true"></span><span id="characterCharge" class="squall-charge" aria-hidden="true"><span id="characterChargeFill" class="squall-charge-fill"></span></span></button>
+</aside>
+<main>
+  <div class="workspace-atmosphere" aria-hidden="true">
+    <div class="workspace-aether-glow"></div>
+    <svg class="workspace-aether-wave" viewBox="0 0 1000 400" fill="none" focusable="false" preserveAspectRatio="none">
+      <defs><linearGradient id="workspace-aether-spectrum" x1="0" y1="80" x2="1000" y2="300" gradientUnits="userSpaceOnUse"><stop stop-color="#4c8dff" stop-opacity="0"/><stop offset=".3" stop-color="#657dff"/><stop offset=".6" stop-color="#64e5e0"/><stop offset=".8" stop-color="#b2a0ff"/><stop offset="1" stop-color="#4c8dff" stop-opacity="0"/></linearGradient></defs>
+      <g class="aether-current aether-current-back" stroke="url(#workspace-aether-spectrum)"><path d="M-100 230 C100 20 200 370 420 180 S700 70 1100 250" stroke-width="22" opacity=".08"/><path d="M-100 230 C100 20 200 370 420 180 S700 70 1100 250" stroke-width="1.2" opacity=".45"/></g>
+      <g class="aether-current aether-current-front" stroke="url(#workspace-aether-spectrum)"><path d="M-100 150 C120 340 260 10 490 190 S790 320 1100 100" stroke-width="14" opacity=".07"/><path d="M-100 150 C120 340 260 10 490 190 S790 320 1100 100" stroke-width=".8" opacity=".4"/></g>
+    </svg>
+    <div class="workspace-crystal-drift"><div class="workspace-crystal">
+      <span class="crystal-face crystal-face-top" style="--facet:0deg"></span><span class="crystal-face crystal-face-top" style="--facet:90deg"></span><span class="crystal-face crystal-face-top" style="--facet:180deg"></span><span class="crystal-face crystal-face-top" style="--facet:270deg"></span>
+      <span class="crystal-face crystal-face-bottom" style="--facet:0deg"></span><span class="crystal-face crystal-face-bottom" style="--facet:90deg"></span><span class="crystal-face crystal-face-bottom" style="--facet:180deg"></span><span class="crystal-face crystal-face-bottom" style="--facet:270deg"></span>
+    </div></div>
+  </div>
+  <section id="queuePanel" class="card live-queue" aria-labelledby="queueTitle" hidden>
+    <div class="queue-heading"><div><h2 id="queueTitle"><span id="queueTitleText">Live queue</span> <span id="queueCount" class="queue-count"></span></h2><p id="queueName">Active unassigned tasks</p></div><button id="hideQueue" type="button" aria-label="Hide live queue">Hide</button></div>
+    <div class="queue-controls"><button id="queueRefresh" type="button">Refresh</button><a id="queueSource" href="https://i3dnet.atlassian.net/jira/dashboards/12754?maximized=59715" target="_blank" rel="noopener noreferrer">View in Jira &nearr;</a><span id="queueStatus" role="status"></span></div>
+    <div class="queue-table-wrap"><table class="queue-table"><caption class="visually-hidden">Tickets in Jira filter order. Select a ticket to open it in the desk.</caption><thead><tr><th scope="col">Ticket</th><th scope="col">Status</th><th scope="col">Priority</th><th scope="col">Created</th><th scope="col"><span class="visually-hidden">Assignment</span></th></tr></thead><tbody id="queueRows"></tbody></table></div>
+    <p id="queueEmpty" class="muted" hidden></p><button id="queueMore" type="button" hidden>Load more tickets</button><p id="queueOpenStatus" class="hint" role="status"></p>
+  </section>
+  <div class="workspace-toolbar" aria-label="Workspace modules">
+    <span>Show module</span><span id="state" class="workspace-state" role="status">Ready</span>
+    <button id="showImportModule" type="button">Open ticket</button>
+    <button id="showTicketModule" type="button">Ticket details</button>
+    <button id="showDraftModule" type="button">Conversation</button>
+    <button id="resetDeskLayout" type="button" class="reset-layout">Reset layout</button>
+  </div>
+  <div id="deskCanvas" class="desk-canvas">
+    <section id="importModule" class="desk-module card import" aria-labelledby="importHandle">
+      <div class="module-titlebar"><button id="importHandle" type="button" class="module-handle" title="Drag to move. Arrow keys move the module; Shift moves one pixel."><span>Open ticket</span><span aria-hidden="true">&#x283F;</span></button><button id="minimizeImport" type="button" class="module-minimize" aria-label="Minimize Open ticket" aria-controls="importModuleContent" aria-expanded="true" title="Minimize Open ticket">&minus;</button></div>
+      <div id="importModuleContent" class="module-content">
+
+      <div class="module-body">
+        <form id="openTicketForm" class="open-ticket-bar">
+          <label class="visually-hidden" for="jiraInput">Jira ticket key or URL</label>
+          <input id="jiraInput" placeholder="Ticket key or Jira URL" autocomplete="off" spellcheck="false" aria-describedby="ticketInputFeedback">
+          <button class="primary" id="importBtn" type="submit">Open</button>
+        </form>
+        <p id="ticketInputFeedback" class="open-input-feedback" role="status" hidden></p>
+        <span id="ticketInputAnnouncement" class="visually-hidden" role="status" aria-live="polite"></span>
+        <details id="pasteTicketDetails" class="paste-ticket-details"><summary>Paste ticket text instead</summary><label class="visually-hidden" for="raw">Copied ticket text</label><textarea id="raw" placeholder="Paste copied ticket text..."></textarea><button id="parseBtn" type="button">Open pasted ticket</button></details>
+      </div>
+
+      </div>
+    </section>
+    <section id="ticketModule" class="desk-module card" aria-labelledby="ticketHandle">
+      <div class="module-titlebar"><button id="ticketHandle" type="button" class="module-handle" title="Drag to move. Arrow keys move the module; Shift moves one pixel."><span>Ticket details</span><span aria-hidden="true">&#x283F;</span></button><button id="captureTicket" type="button" class="module-capture" aria-label="Save Ticket details as a PNG screenshot" title="Save this panel as a PNG in the Screenshots folder">Screenshot</button><button id="minimizeTicket" type="button" class="module-minimize" aria-label="Minimize Ticket details" aria-controls="ticketModuleContent" aria-expanded="true" title="Minimize Ticket details">&minus;</button></div>
+      <div id="ticketModuleContent" class="module-content">
+
+<button id="changeTicketStatus" type="button" hidden disabled>Change status</button>
+      <p id="statusActionStatus" class="jira-action-status" role="status"></p>
+      <p id="coordinateActionStatus" class="jira-action-status" role="status"></p>
+      <div id="ticket" class="ticket-content empty">Load a ticket to begin.</div>
+      <details class="ticket-sync-options"><summary>Sync options</summary><div class="jira-live-controls"><button id="refreshTicket" type="button" disabled>Refresh from Jira</button><label><input id="liveRefresh" type="checkbox" checked>Auto-refresh (60s)</label><span id="liveSyncStatus" role="status">Local snapshot</span></div></details>
+
+      <section id="coordinateDialog" class="inline-ticket-panel" role="region" aria-labelledby="coordinateTitle" hidden><h2 id="coordinateTitle">Change coordinate</h2><label for="coordinateTarget">Coordinate</label><select id="coordinateTarget"><option value="location">Datacenter</option><option value="rack">Rack</option><option value="unit">Unit</option><option value="serviceTag">Service tag</option></select><p id="coordinateSource" class="muted"></p><label for="coordinateValue" id="coordinateValueLabel">New value</label><input id="coordinateValue" maxlength="1000"><select id="coordinateSelect" aria-label="New coordinate value" hidden></select><p class="hint" id="coordinateHint"></p><label class="coordinate-note-toggle"><input id="coordinateAddNote" type="checkbox">Add internal work note</label><pre id="coordinatePreview" class="jira-preview"></pre><p id="coordinateError" class="jira-error" role="status"></p><div class="line"><button id="cancelCoordinate" type="button">Cancel</button><button id="confirmCoordinate" type="button" class="primary" disabled>Save coordinate</button></div></section>
+      <section id="statusDialog" class="inline-ticket-panel" role="region" aria-labelledby="statusDialogTitle" hidden><h2 id="statusDialogTitle">Change ticket status</h2><p id="currentStatusText"></p><label for="statusTransition">Available Jira transition</label><select id="statusTransition" disabled><option value="">Loading...</option></select><p id="statusTransitionHint" class="hint"></p><p id="statusError" class="jira-error" role="status"></p><div class="line"><button id="cancelStatusChange" type="button">Cancel</button><button id="confirmStatusChange" type="button" class="primary" disabled>Change status in Jira</button></div></section>
+      </div>
+    </section>
+    <section id="draftModule" class="desk-module card ticket-workflow conversation-module" aria-labelledby="draftHandle">
+      <div class="module-titlebar"><button id="draftHandle" type="button" class="module-handle" title="Drag to move. Arrow keys move the module; Shift moves one pixel."><span>Conversation</span><span aria-hidden="true">&#x283F;</span></button><button id="minimizeDraft" type="button" class="module-minimize" aria-label="Minimize Conversation" aria-controls="draftModuleContent" aria-expanded="true" title="Minimize Conversation">&minus;</button></div>
+      <div id="draftModuleContent" class="module-content">
+        <div id="conversationHistory" class="conversation-history module-body">
+          <div class="conversation-history-heading"><h3>Activity <span id="conversationCount" class="conversation-count">0</span></h3><button id="toggleHistory" type="button" hidden>View history</button></div>
+          <div class="comments-controls"><label class="visually-hidden" for="commentFilter">Filter activity</label><select id="commentFilter" aria-label="Filter activity"><option value="all">All activity</option><option value="customer">Customer replies</option><option value="work">Internal notes</option></select><button id="refreshComments" type="button" disabled>Refresh</button></div>
+          <p id="commentsStatus" class="hint" role="status">Load a ticket to see activity.</p>
+          <div id="commentsList" class="comments-list" aria-label="Ticket conversation"></div>
+          <button id="moreComments" type="button" hidden>Load more history</button>
+        </div>
+        <div class="conversation-composer module-body">
+          <div class="composer-heading"><div class="draft-modes" role="group" aria-label="Message type"><button id="customerMode" aria-pressed="true" class="primary">Customer reply</button><button id="workMode" aria-pressed="false">Internal note</button></div><span id="draftVisibility" class="composer-visibility customer">Public</span></div>
+          <p id="draftHint" class="visually-hidden">Customer replies are visible to the customer.</p>
+          <label id="draftLabel" class="visually-hidden" for="customerReply">Customer reply draft</label>
+          <textarea id="customerReply" rows="7" placeholder="Write your reply..." disabled></textarea>
+          <textarea id="notes" rows="7" placeholder="Add an internal note..." hidden disabled aria-label="Internal note draft"></textarea>
+          <div class="composer-utilities"><button id="addGreeting" type="button" class="greeting-shortcut" disabled>Greeting + thank you</button><details id="composerMore" class="composer-more"><summary aria-label="More draft actions" title="Copy or insert a template">&#x22EF;</summary><div class="composer-menu"><button id="copyDraft" type="button" disabled>Copy draft</button><button id="insertTemplate" type="button" disabled>Insert template</button></div></details><span id="draftStatus" class="composer-save-status" role="status"></span></div>
+          <button id="postDraft" type="button" class="primary jira-post-button" disabled>Review &amp; send</button>
+          <p id="jiraPostStatus" class="hint composer-post-status" role="status"></p>
+        </div>
+        <section id="jiraPostDialog" class="inline-ticket-panel" role="region" aria-labelledby="jiraPostTitle" hidden><h2 id="jiraPostTitle">Review Jira comment</h2><p id="jiraPostAudience"></p><pre id="jiraPostPreview" class="jira-preview"></pre><p id="jiraPostError" class="jira-error" role="status"></p><div class="line"><button id="cancelJiraPost" type="button">Cancel</button><button id="confirmJiraPost" type="button" class="primary">Post to Jira</button></div></section>
+      </div>
+    </section>
+  </div>
+</main>
+<section id="ticketTabsPanel" class="ticket-tabs-panel" aria-label="Ticket tabs">
+  <div class="tabs-heading"><h2 id="tabsTitle">Ticket tabs</h2><span id="tabCount" class="tab-count">0</span><button id="toggleTicketTabs" type="button" class="tabs-panel-toggle" aria-controls="ticketTabsContent" aria-expanded="true" aria-label="Collapse ticket tabs" title="Collapse ticket tabs">&#x203A;</button></div>
+  <div id="ticketTabsContent">
+  <button id="newTicket" class="dashed">+ New ticket</button>
+  <form id="saveTabForm" class="save-tab-form">
+    <label for="tabLabel">Tab label</label>
+    <input id="tabLabel" maxlength="80" placeholder="e.g. AMS disk replacement" required disabled>
+    <button id="saveTicketTab" class="primary" disabled>Save as tab</button>
+  </form>
+  <p id="tabStatus" class="hint" role="status">Load a ticket, choose a label, then save it here.</p>
+  <nav id="savedTicketTabs" class="saved-ticket-tabs" aria-label="Saved ticket tabs"></nav>
+  <p class="hint">Edit the label and choose Update tab to rename a saved ticket.</p>
+  <section class="session-controls" aria-labelledby="sessionTitle">
+    <h3 id="sessionTitle">SESSION</h3>
+    <p id="sessionStatus" class="hint" role="status">Restoring your session...</p>
+    <button id="saveSessionNow" type="button">Save now</button>
+    <div class="session-actions"><button id="exportSession" type="button">Export backup</button><button id="importSession" type="button">Restore backup</button></div>
+    <input id="sessionFile" type="file" accept=".json,application/json" hidden>
+  </section>
+  </div>
+</section>
+</div>
+<dialog id="toolDialog"><form method="dialog"><h2>Add tool</h2><label for="toolName">Tool name</label><input id="toolName" placeholder="Tool name"><label for="toolUrl">URL</label><input id="toolUrl" placeholder="https://..."><label for="toolIcon">Icon</label><select id="toolIcon"><option>Link</option><option>Web</option><option>Docs</option><option>Host</option><option>Net</option></select><div class="line"><button value="cancel">Cancel</button><button class="primary" value="default" id="saveTool">Add</button></div></form></dialog>
+<dialog id="restoreSessionDialog"><h2>Restore session?</h2><p id="restoreSessionSummary"></p><p>This replaces the open workspace. Your current session is kept as a recovery copy on this computer.</p><div class="line"><button id="cancelRestore" type="button">Cancel</button><button id="confirmRestore" type="button" class="primary">Restore session</button></div></dialog>
+
+
+
+<script src="brand-duck.js?v=1"></script><script src="character-player.js?v=1"></script><script src="desk-layout.js"></script><script src="session-format.js"></script><script src="workflow.js"></script><script src="queue.js?v=hardware-1"></script><script src="vendor/html2canvas.min.js"></script><script src="app.js?v=save-screenshots-1"></script>
+</body></html>
